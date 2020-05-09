@@ -1,0 +1,147 @@
+#include "SORT.h"
+void display(int arr[], int len){
+	for (int i = 0; i < len; i++){
+		printf("%d ", arr[i]);
+	}
+	printf("\n");
+}
+void swap(int arr[], int start, int min){
+	int tmp = arr[start];
+	arr[start] = arr[min];
+	arr[min] = tmp;
+}
+
+// 三数取中
+// 三数取中--> 找到三个数中的中间数
+// 其最重要的目的就是防止序排序数组的有序情况，其时间复杂度为O(n^2)
+// 在三个数中去中值极大的避免了这种已有序情况
+int getMid(int* arr, int begin, int end){
+	int mid = begin + (end - begin) / 2;
+	// 先与中间值mid比较
+	if (arr[begin] < arr[mid]){
+		if (arr[mid] < arr[end]){
+			return mid;
+		}
+		else{ // mid >= end && mid > begin
+			if (arr[begin] > arr[end]){
+				return begin;
+			}
+			else{
+				return end;
+			}
+		}
+	}
+	else{ // begin <= mid
+		if (arr[mid] < arr[end]){
+			return mid;
+		}
+		else{ // mid >= end && begin<=mid
+			if (arr[begin] > arr[end])
+				return end;
+			else
+				return begin;
+		}
+	}
+}
+
+/*
+	时间复杂度：
+		满二叉树均衡划分 划分层次 logn
+		时间复杂度 O(nlogn)
+		最坏：数据有序的情况可能会崩掉，内存栈溢出，由于递归层数过多
+			数据有序：划分：每次只能产生一个待划分的区间
+					此时快速排序退化为冒泡排序：递归算法的递归深度太大，容易导致栈溢出
+						调用栈太多，只有压栈，没有出栈，栈压满
+			O(n^2)
+			因此快排需要优化
+				三数取中法
+		平均情况 O(nlogn)
+	空间复杂度：
+		空间就是变量的个数
+			栈的空间  函数调用栈 O(logn) ， 极端情况下就是O(n)
+	稳定性：
+		不稳定
+		2 2 2 1：此时如果以第一个2作为基准值，则会发生变化，由于基准值需要发生变化，所以不稳定
+	数据敏感与否：
+			数据敏感
+
+	·解决划分不均衡问题 
+		  几个数中去取中间值作为基准值
+		  begin mid end : 三数取中解决不均衡问题
+		  三数取中法：可以把最坏的情况-->均衡划分
+*/
+int getmid(int* arr, int begin, int end){
+	int mid = begin + (end - begin) / 2;
+	// begin , mid , end 选择中间值的位置
+	if (arr[begin] < arr[mid]){
+		// begin < mid
+		if (arr[mid] < arr[end]){
+			return mid;
+		}
+		else{
+			// begin < mid , end <= mid
+			if (arr[begin] > arr[end]){
+				return begin;
+			}
+			else{
+				return end;
+			}
+		}
+	}
+	else{ // begin >= mid
+		if (arr[mid] > arr[end]){
+			return mid;
+		}
+		else{
+			// begin >= mid , end >= mid
+			if (arr[begin] <= arr[end]){
+				return begin;
+			}
+			else{
+				return end;
+			}
+		}
+	}
+}
+int partion(int* arr, int l, int h){
+	int mid = getmid(arr, l, h);
+	swap(arr, l, mid);
+	//int mid = l;
+	int cur = arr[l];
+	while (l < h){
+		while (l < h && arr[h] > cur)
+			h--;
+		arr[l] = arr[h];
+		while (l < h && arr[l] <= cur)
+			l++;
+		arr[h] = arr[l];
+	}
+	arr[l] = cur;
+	return l;
+}
+void QSORT(int* arr, int l, int h){
+	if (l < h){
+		int m = partion(arr, l, h);
+		QSORT(arr, l, m - 1);
+		QSORT(arr, m + 1, h);
+	}
+}
+void QUICKSORT(int* arr, int len){
+	QSORT( arr, 0, len - 1);
+}
+void test(){
+	srand((unsigned long)time(NULL));
+	int num = 10;
+	int* arr = (int*)malloc(sizeof(int) * num);
+	for (int i = 0; i < num; i++){
+		arr[i] = rand();
+	}
+	display(arr, num);
+	QUICKSORT(arr, num);
+	display(arr, num);
+}
+int main(void){
+	test();
+	system("pause");
+	return 0;
+}
